@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - Stationery Store</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Poppins", sans-serif;
+      background: #f1f4f8;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .register-container {
+      background: #ffffff;
+      padding: 40px;
+      width: 380px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .register-container h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 28px;
+      color: #2c3e50;
+    }
+
+    .register-container p {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #555;
+    }
+
+    .input-group {
+      margin-bottom: 18px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    .input-group input,
+    .input-group textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      transition: 0.3s;
+      font-size: 15px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .input-group input:focus,
+    .input-group textarea:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 5px rgba(52,152,219,0.5);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      background: #3498db;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #2980b9;
+    }
+
+    #registerMsg {
+      margin-top: 12px;
+      text-align: center;
+      color: red;
+      font-weight: 500;
+    }
+
+    .links {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .links a {
+      text-decoration: none;
+      color: #3498db;
+      font-weight: 500;
+    }
+
+    .links a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="register-container">
+    <h1>Create Account</h1>
+    <p>Register to start shopping</p>
+
+    <form id="registerForm">
+
+      <div class="input-group">
+        <label>Username</label>
+        <input type="text" id="regUsername" required>
+      </div>
+
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="regPassword" required>
+      </div>
+
+      <!-- ✅ ADDRESS FIELD (FIXED) -->
+      <div class="input-group">
+        <label>Delivery Address</label>
+        <textarea
+          id="addressInput"
+          rows="3"
+          placeholder="Enter your full delivery address"
+          required
+        ></textarea>
+      </div>
+
+      <button type="submit">Register</button>
+      <div id="registerMsg"></div>
+
+    </form>
+
+    <div class="links">
+      <p>Already have an account? <a href="login.html">Login</a></p>
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('regUsername').value.trim();
+      const password = document.getElementById('regPassword').value.trim();
+      const address  = document.getElementById('addressInput').value.trim(); 
+       const msgEl = document.getElementById('registerMsg');
+   if (password.length < 5|| password.length >7) {
+  msgEl.textContent = "Password must be 5 to 7 characters only";
+  return;
+}
+
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            username,
+            password,
+            address     // ✅ SENT TO BACKEND
+          })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          window.location.href = 'login.html';
+        } else {
+        msgEl.style.color = "red";
+        msgEl.textContent = data.message || 'Registration failed';
+      }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  </script>
+
+</body>
+</html>

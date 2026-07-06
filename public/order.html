@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Orders - Stationery Store</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <header>
+    <h1>My Orders</h1>
+
+    <nav class="top-nav">
+      <a class="nav-btn" href="index.html">Home</a> |
+      <a class="nav-btn" href="products.html">Products</a> |
+      <a class="nav-btn" href="order.html">My Orders</a> |
+      <a class="nav-btn" href="order-tracking.html">Track</a> |
+      <a class="nav-btn" href="login.html" id="loginLink">Login</a> |
+      <a class="nav-btn" href="register.html">Register</a> |
+      <a class="nav-btn" href="#" id="logoutLink" style="display:none;">Logout</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Your Order History</h2>
+    <h2>My Orders</h2>
+<div id="ordersContainer"></div>
+  </main>
+
+  <script>
+    // ================= AUTH CHECK & LOGOUT =================
+    async function checkAuth() {
+      try {
+        const res = await fetch('/api/check-auth', { credentials: 'include' });
+        const data = await res.json();
+
+        const loginLink = document.getElementById('loginLink');
+        const logoutLink = document.getElementById('logoutLink');
+
+        if (data.loggedIn) {
+          if (loginLink) loginLink.textContent = data.username;
+          if (logoutLink) logoutLink.style.display = 'inline';
+        } else {
+          if (loginLink) loginLink.textContent = 'Login';
+          if (logoutLink) logoutLink.style.display = 'none';
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    const logoutLinkEl = document.getElementById('logoutLink');
+    if (logoutLinkEl) {
+      logoutLinkEl.addEventListener('click', async (e) => {
+        e.preventDefault();
+        await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+        window.location.href = 'login.html';
+      });
+    }
+
+    // ================= LOAD ORDERS =================
+async function loadOrders() {
+
+  const container = document.getElementById("ordersContainer");
+  if (!container) return;
+
+  const res = await fetch("/api/orders", { credentials: "include" });
+  const orders = await res.json();
+  
+
+  container.innerHTML = "";
+
+  orders.forEach(o => {
+
+  let details = "";
+
+  if (o.items && o.items.length > 0) {
+    details = o.items.map(i =>
+      `${i.productId?.name || "Product"} x${i.quantity}`
+    ).join(", ");
+  } else if (o.pageCount) {
+    details = `${o.pageCount} pages (${o.size})`;
+  }
+
+  // ✅ Safe delivery date
+  const deliveryDate = o.deliveryDate
+    ? new Date(o.deliveryDate).toLocaleDateString('en-IN', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      })
+    : "Not available";
+
+  const div = document.createElement("div");
+
+  div.innerHTML = `
+    <h3>Order ID: ${o._id}</h3>
+    <p><b>Items:</b> ${details}</p>
+    <p><b>Address:</b> ${o.address || "No address"}</p>
+    <p><b>Total Amount:</b> ₹${o.totalAmount || 0}</p>
+    <p><b>Payment Method:</b> ${o.paymentMethod || "COD on Print"}</p>
+    <p><b>Delivery OTP:</b> ${o.otp}</p>
+    <p><b>Delivery Date:</b> ${deliveryDate}</p>
+    <p><b>Status:</b> ${o.status}</p>
+    <a href="/api/bill/${o._id}" target="_blank">Print Bill</a>
+    <button 
+      onclick="cancelOrder('${o._id}')" 
+      ${o.status === 'Delivered' || o.status === 'Cancelled' ? 'disabled' : ''}
+    >
+      Cancel Order
+    </button>
+
+    <hr>
+  `;
+  container.appendChild(div);
+
+});
+}
+async function cancelOrder(orderId) {
+  const res = await fetch(`/api/order/cancel/${orderId}`, {
+    method: 'POST',
+    credentials: 'include'
+  });
+  const data = await res.json();
+  alert(data.message);
+}
+    // ================= INIT =================
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      loadOrders();
+    });
+    
+  </script>
+
+</body>
+</html>

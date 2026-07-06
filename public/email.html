@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register & Verify Email</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(120deg, #1e3c72, #2a5298);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #fff;
+      width: 100%;
+      max-width: 420px;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 18px;
+      color: #1e3c72;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #2a5298;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #2a5298;
+      color: #fff;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background: #1e3c72;
+    }
+
+    .divider {
+      margin: 25px 0;
+      height: 1px;
+      background: #ddd;
+    }
+
+    .msg {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: #333;
+      font-weight: bold;
+    }
+
+    .status {
+      text-align: center;
+      font-size: 15px;
+      margin-bottom: 10px;
+      color: #444;
+      font-weight: bold;
+    }
+
+    .footer-text {
+      text-align: center;
+      font-size: 13px;
+      color: #777;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <!-- EMAIL REGISTER SECTION -->
+  <h2>Create Account (Email Verification)</h2>
+
+  <div class="input-group">
+    <input type="email" id="email" placeholder="Email address" required>
+  </div>
+
+  <div class="input-group">
+    <input type="password" id="password" placeholder="Password" required>
+  </div>
+
+  <button onclick="register()">Register & Send Verification</button>
+
+  <p class="msg" id="msg"></p>
+
+  <div class="divider"></div>
+
+  <!-- GOOGLE SIGN IN -->
+  <h2>Sign Up / Login with Google</h2>
+
+  <button onclick="googleLogin()">Sign in with Google</button>
+
+  <p class="msg" id="googleMsg"></p>
+
+  <div class="divider"></div>
+
+  <!-- EMAIL VERIFY SECTION -->
+  <h2>Email Verification</h2>
+  <p class="status" id="status">After verifying email, click below</p>
+
+  <button onclick="checkVerification()">Check Verification</button>
+
+  <p class="footer-text">
+    Please check your inbox (and spam folder)
+  </p>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+    signInWithEmailAndPassword,
+    reload,
+    GoogleAuthProvider,
+    signInWithPopup
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  // ✅ Correct Firebase Config (your project)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBxas_UoXLbn0tu6NvQNRQoBj9FWFT4-uI",
+    authDomain: "stationery-website-c7cee.firebaseapp.com",
+    projectId: "stationery-website-c7cee",
+    storageBucket: "stationery-website-c7cee.appspot.com",
+    messagingSenderId: "553718261048",
+    appId: "1:553718261048:web:cd2cc5804e5c649fe8cdcd"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // ================= EMAIL REGISTER =================
+  window.register = async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    document.getElementById("msg").innerText = "";
+
+    if (!email || !password) {
+      document.getElementById("msg").innerText = "Enter email and password.";
+      return;
+    }
+
+    try {
+      const userCred = await createUserWithEmailAndPassword(auth, email, password);
+      await sendEmailVerification(userCred.user);
+
+      document.getElementById("msg").innerText =
+        "Verification email sent. Please check inbox/spam.";
+
+    } catch (err) {
+      console.log(err);
+
+      // if email already exists -> try login
+      if (err.code === "auth/email-already-in-use") {
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+
+          document.getElementById("msg").innerText =
+            "Email already exists. Logged in. Now verify email.";
+
+        } catch (loginErr) {
+          document.getElementById("msg").innerText =
+            "Email already exists but password is incorrect.";
+        }
+      } else {
+        document.getElementById("msg").innerText = err.message;
+      }
+    }
+  };
+
+  // ================= CHECK VERIFICATION =================
+  window.checkVerification = async () => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      document.getElementById("status").innerText =
+        "Session expired. Please register/login again.";
+      return;
+    }
+
+    await reload(user);
+
+    if (user.emailVerified) {
+      document.getElementById("status").innerText =
+        "Email verified successfully! Logging in...";
+
+      try {
+        const res = await fetch("/api/firebase-login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: user.email })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          document.getElementById("status").innerText =
+            "Login successful! Redirecting...";
+
+          setTimeout(() => {
+            window.location.href = "products.html";
+          }, 1500);
+
+        } else {
+          document.getElementById("status").innerText =
+            "Backend login failed: " + data.message;
+        }
+
+      } catch (err) {
+        document.getElementById("status").innerText =
+          "Server error. Try again.";
+      }
+
+    } else {
+      document.getElementById("status").innerText =
+        "Email not verified yet. Please check your email.";
+    }
+  };
+
+  // ================= GOOGLE LOGIN =================
+  window.googleLogin = async () => {
+    document.getElementById("googleMsg").innerText = "";
+
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+
+      console.log("Google user:", result.user.email);
+
+      const res = await fetch("/api/firebase-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: result.user.email })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        document.getElementById("googleMsg").innerText =
+          "Google login successful! Redirecting...";
+
+        setTimeout(() => {
+          window.location.href = "products.html";
+        }, 1500);
+
+      } else {
+        document.getElementById("googleMsg").innerText =
+          "Backend login failed: " + data.message;
+      }
+
+    } catch (err) {
+      console.error("Google login error:", err.code, err.message);
+      document.getElementById("googleMsg").innerText =
+        "Google login failed: " + err.code;
+    }
+  };
+</script>
+
+</body>
+</html>

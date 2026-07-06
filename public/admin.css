@@ -1,0 +1,242 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+}
+
+/* ================= HEADER ================= */
+.admin-header {
+  background: #131921;
+  color: #fff;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.back-site {
+  color: #fff;
+  text-decoration: none;
+  margin-right: 15px;
+}
+
+.logout-btn {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #dc2626;
+}
+
+/* ================= LAYOUT ================= */
+.admin-container {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+/* ================= SIDEBAR ================= */
+.admin-sidebar {
+  width: 220px;
+  background: #1f2937;
+  padding: 15px;
+}
+
+.admin-sidebar button {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: none;
+  background: #374151;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+.admin-sidebar button:hover {
+  background: #4b5563;
+}
+
+/* ================= CONTENT ================= */
+.admin-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.admin-section h3 {
+  margin-bottom: 15px;
+}
+
+/* ================= FORMS ================= */
+.admin-form input,
+.admin-form textarea,
+.admin-form button {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.admin-form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.admin-form button {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-form button:hover {
+  background: #1d4ed8;
+}
+
+/* ================= TABLE ================= */
+.admin-table {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 15px;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  align-items: center;
+}
+
+.table-row.header {
+  background: #e5e7eb;
+  font-weight: bold;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.table-row .edit {
+  background: #facc15;
+}
+
+.table-row .delete {
+  background: #ef4444;
+  color: #fff;
+}
+
+.table-row select {
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+/* ================= UTILITY ================= */
+.hidden {
+  display: none;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+
+  .admin-container {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+  }
+
+  .admin-sidebar button {
+    text-align: center;
+  }
+
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+.admin-table {
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+  font-family: "Poppins", sans-serif;
+}
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 2fr 0.7fr 0.7fr 1fr 1fr 1fr 1fr;
+  padding: 12px;
+  align-items: center;
+}
+
+.table-header {
+  background: #2c3e50;
+  color: white;
+  font-weight: bold;
+}
+
+.table-row {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  transition: 0.2s;
+}
+
+.table-row:hover {
+  background: #f9f9f9;
+}
+
+/* STATUS COLORS */
+.status {
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status.OrderPlaced {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status.Shipped {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status.Delivered {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* DROPDOWN */
+select {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}

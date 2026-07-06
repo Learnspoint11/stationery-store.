@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel - Morya Stationery</title>
+
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+
+<body>
+
+<header class="admin-header">
+  <h2>🛠️ Admin Dashboard</h2>
+  <a href="index.html" class="back-site">← Back to Website</a>
+  <button onclick="logout()" class="logout-btn">Logout</button>
+</header>
+
+<div class="admin-container">
+
+  <!-- SIDEBAR -->
+  <aside class="admin-sidebar">
+    <button onclick="showSection('products')">
+      <i class="fa fa-store"></i> Products
+    </button>
+
+    <button onclick="showSection('orders')">
+      <i class="fa fa-box"></i> Orders
+    </button>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="admin-content">
+
+    <!-- PRODUCTS SECTION -->
+    <section id="products" class="admin-section">
+      <h3>Manage Products</h3>
+
+
+      <form id="addProductForm" class="admin-form">
+        <input type="text" id="productName" placeholder="Product Name" required>
+        <input type="number" id="productPrice" placeholder="Price" required>
+        <input type="text" id="productImage" placeholder="Image Path (images/xxx.png)">
+        <textarea id="productDesc" placeholder="Description"></textarea>
+        <button type="submit">Add Product</button>
+      </form>
+
+      <div class="admin-table" id="productTable">
+        <div class="table-row header">
+          <span>Name</span>
+          <span>Price</span>
+          <span>Action</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ORDERS SECTION -->
+    <section id="orders" class="admin-section" style="display:none;">
+      <h3>Manage Orders</h3>
+  <div class="dashboard-cards">
+    <div class="card">
+      <h3>Total Orders</h3>
+      <p id="totalOrders">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Pending</h3>
+      <p id="pendingOrders">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Shipped</h3>
+      <p id="shippedOrders">0</p>
+    </div>
+
+    <div class="card">
+      <h3>Delivered</h3>
+      <p id="deliveredOrders">0</p>
+    </div>
+  </div>
+
+  <!-- existing table -->
+  <div class="admin-table"></div>
+    </section>
+  </main>
+
+<!-- Protect Admin Page -->
+<script>
+  if (localStorage.getItem("adminLoggedIn") !== "true") {
+    window.location.href = "admin-login.html";
+  }
+
+  function logout() {
+    localStorage.removeItem("adminLoggedIn");
+    window.location.href = "admin-login.html";
+  }
+</script>
+<style>
+  .dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.card h3 {
+  font-size: 14px;
+  color: #555;
+}
+
+.card p {
+  font-size: 22px;
+  font-weight: bold;
+}
+</style>
+<script src="admin.js"></script>
+
+</body>
+</html>

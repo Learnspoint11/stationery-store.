@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Forgot Password</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .box {
+      background: #fff;
+      padding: 30px;
+      width: 320px;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #3498db;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #2980b9;
+    }
+
+    #msg {
+      text-align: center;
+      margin-top: 10px;
+      color: red;
+    }
+
+    a {
+      display: block;
+      text-align: center;
+      margin-top: 12px;
+      text-decoration: none;
+      color: #3498db;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <h2>Forgot Password</h2>
+
+    <input type="text" id="username" placeholder="Username" required>
+    <input type="password" id="newPassword" placeholder="New Password" required>
+
+    <button onclick="resetPassword()">Reset Password</button>
+
+    <div id="msg"></div>
+
+    <a href="login.html">Back to Login</a>
+  </div>
+
+  <script>
+    async function resetPassword() {
+      const username = document.getElementById('username').value.trim();
+      const newPassword = document.getElementById('newPassword').value.trim();
+      const msg = document.getElementById('msg');
+
+      msg.textContent = '';
+
+      try {
+        const res = await fetch('/api/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, newPassword })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          msg.style.color = 'green';
+          msg.textContent = data.message;
+        } else {
+          msg.style.color = 'red';
+          msg.textContent = data.message;
+        }
+      } catch (err) {
+        console.error(err);
+        msg.textContent = 'Something went wrong';
+      }
+    }
+  </script>
+
+</body>
+</html>

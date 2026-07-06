@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Products - Morya Stationery Store</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header>
+    <h1>Our Products</h1>
+
+    <nav class="top-nav">
+      <a class="nav-btn" href="index.html">Home</a> |
+      <a class="nav-btn" href="products.html">Products</a> |
+      <a class="nav-btn" href="order.html">My Orders</a> |
+      <a class="nav-btn" href="login.html" id="loginLink">Login</a> |
+      <a class="nav-btn" href="register.html">Register</a> |
+      <a class="nav-btn" href="#" id="logoutLink" style="display:none;">Logout</a>
+    </nav>
+  </header>
+  <input type="text" id="searchInput" placeholder="Search products..." />
+  <a href="wishlist.html">❤️ Wishlist</a>
+
+  <!-- ✅ ADDRESS INPUT SECTION -->
+  <div id="addressBox" style="display:none; max-width:900px; margin:20px auto; padding:15px; background:#fff; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+    <h3 style="margin-bottom:10px;">Delivery Address</h3>
+
+    <textarea id="addressInput" placeholder="Enter your full delivery address"
+      style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px;"
+      rows="3"></textarea>
+
+    <button id="saveAddressBtn"
+      style="padding:10px 20px; border:none; border-radius:8px; background:#2a5298; color:white; cursor:pointer;">
+      Save Address
+    </button>
+  </div>
+
+  <!-- ================= DYNAMIC PRODUCTS ================= -->
+  <main id="productsGrid" class="products-grid"></main>
+
+  <!-- ================= CUSTOM DESIGN PRODUCT ================= -->
+  <div style="max-width:900px;margin:30px auto;background:#fff;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+    <h3>Upload Files for Printing</h3>
+    <p style="color:red;"><strong >COD charges ₹50 ,No refunds</strong></p></pstyle>
+    <p><strong>B-₹2 C-₹10 </strong></p>
+
+    <!-- ✅ PAGE COUNT ADDED -->
+    <div style="margin:15px 0;">
+      <label><strong>No. of Pages:</strong></label><br>
+      <button type="button" onclick="decreasePages()">-</button>
+      <input type="number" id="pageCount" value="1" min="1" style="width:60px;text-align:center;">
+      <button type="button" onclick="increasePages()">+</button>
+
+<select id="size" required>
+  <option value="B">Black & White (₹2 per page)</option>
+  <option value="C">Color (₹10 per page)</option>
+</select>
+    </div>
+
+    <form id="customUploadForm" enctype="multipart/form-data">
+      <input type="file" id="designFile" name="designFile" accept="image/*,.pdf" required>
+      <button type="submit">Upload & Order</button>
+    </form>
+
+    <p id="uploadMsg" style="margin-top:10px;"></p>
+  </div>
+
+  <!-- ================= CART BAR ================= -->
+  <div class="cart-bar">
+    <button id="viewCartBtn">View Cart (<span id="cartCount">0</span>)</button>
+  </div>
+
+  <!-- ================= CART MODAL ================= -->
+  <div id="cartModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Your Cart</h3>
+      <div id="cartItems"></div>
+      <div id="cartTotal"></div>
+      <button id="checkoutBtn">Checkout (Place Order)</button>
+      <button id="closeCartBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- ================= PAYMENT MODAL ================= -->
+    <div id="paymentModal" class="modal" style="display:none;">
+  <div class="modal-content">
+
+    <h3>Select Payment Method</h3>
+
+    <label>
+      <input type="radio" name="payment" value="COD" checked>
+      Cash on Delivery
+    </label><br>
+
+    <label>
+      <input type="radio" name="payment" value="Card">
+      Pay via UPI / Card
+    </label><br><br>
+
+    <button id="confirmPaymentBtn">Confirm Payment</button>
+    <button id="cancelPaymentBtn">Cancel</button>
+
+  </div>
+</div>
+
+  <!-- ================= SCRIPTS ================= -->
+  <script src="script.js"></script>
+
+  <!-- ================= PAGE COUNT SCRIPT ================= -->
+  <script>
+    function increasePages() {
+      const input = document.getElementById("pageCount");
+      input.value = parseInt(input.value) + 1;
+    }
+
+    function decreasePages() {
+      const input = document.getElementById("pageCount");
+      if (parseInt(input.value) > 1) {
+        input.value = parseInt(input.value) - 1;
+      }
+    }
+  </script>
+
+  <!-- ================= CUSTOM UPLOAD SCRIPT ================= -->
+  <script>
+    const customForm = document.getElementById("customUploadForm"); // ✅ FIXED ID
+
+    if (customForm) {
+      customForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const fileInput = document.getElementById("designFile");
+        const msg = document.getElementById("uploadMsg");
+        const pageCount = document.getElementById("pageCount").value;
+
+        const formData = new FormData();
+        formData.append("designFile", fileInput.files[0]);
+        formData.append("pageCount", pageCount); // ✅ SEND PAGE COUNT
+
+        try {
+          const res = await fetch("/api/custom-upload", {
+            method: "POST",
+            body: formData,
+            credentials: "include"
+          });
+
+          const data = await res.json();
+
+          if (res.status === 401) {
+            msg.innerText = "Please login first.";
+            msg.style.color = "red";
+            return;
+          }
+
+          msg.innerText = "Custom design uploaded successfully ✅";
+          msg.style.color = "green";
+
+          fileInput.value = "";
+          document.getElementById("pageCount").value = 1;
+
+        } catch (err) {
+          msg.innerText = "Upload failed.";
+          msg.style.color = "red";
+        }
+      });
+    }
+  </script>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="script.js"></script>
+</body>
+</html>

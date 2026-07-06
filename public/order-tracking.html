@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order Tracking - Morya Stationery Store</title>
+
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
+
+  <style>
+    #map {
+      height: 380px;
+      width: 100%;
+      margin-top: 30px;
+      border-radius: 10px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+
+    #trackingResult {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f9f9f9;
+      border-left: 5px solid #2e8b57;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Morya Stationery Store</h1>
+  <nav>
+    <nav class="top-nav">
+      <a  class="nav-btn" href="index.html">Home</a> |
+      <a  class="nav-btn" href="products.html">Products</a> |
+      <a  class="nav-btn" href="order.html">My Orders</a> |
+      <a  class="nav-btn" href="login.html" id="loginLink">Login</a> |
+      <a  class="nav-btn" href="register.html">Register</a> |
+      <a  class="nav-btn" href="#" id="logoutLink" style="display:none;">Logout</a>
+    </nav>
+  
+</header>
+
+<main>
+  <h2>Track Your Order</h2>
+
+  <form id="trackForm">
+    <label for="orderId">Enter Order ID:</label><br>
+    <input
+      type="text"
+      id="orderId"
+      name="orderId"
+      placeholder="e.g. 65af3c2e9d..."
+      required
+      style="width:320px; padding:8px;"
+    >
+    <br><br>
+    <button type="submit">Track Order</button>
+  </form>
+
+  <div id="trackingResult"></div>
+
+  <!-- 📍 MAP -->
+  <div id="map"></div>
+</main>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  // INIT MAP
+  const map = L.map('map').setView([20.5937, 78.9629], 5); // India
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  let marker;
+
+  function updateMap(status) {
+    let location;
+    let message;
+
+    if (status === "Order Placed") {
+      location = [19.0760, 72.8777]; // Store (Mumbai)
+      message = "Order placed at store 🏪";
+    }
+    else if (status === "Out for Delivery") {
+      location = [18.5204, 73.8567]; // Delivery route
+      message = "Out for delivery 🚚";
+    }
+    else if (status === "Delivered") {
+      location = [18.6298, 73.7997]; // Customer
+      message = "Order delivered ✅";
+    }
+
+    if (marker) map.removeLayer(marker);
+
+    marker = L.marker(location)
+      .addTo(map)
+      .bindPopup(message)
+      .openPopup();
+
+    map.setView(location, 12);
+  }
+
+  // HANDLE TRACK FORM
+  document.getElementById('trackForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const orderId = document.getElementById('orderId').value.trim();
+    const resultDiv = document.getElementById('trackingResult');
+
+    resultDiv.innerHTML = "⏳ Tracking order...";
+
+    try {
+      // Inside the trackForm submit listener, after fetching order
+const res = await fetch(`/api/order/${orderId}`);
+const data = await res.json();
+
+if (!res.ok) {
+  resultDiv.innerHTML = `<p style="color:red;">${data.message}</p>`;
+  return;
+}
+
+// ✅ Compute delivery date (createdAt + 5 days)
+const deliveryDate = new Date(data.createdAt);
+deliveryDate.setDate(deliveryDate.getDate() + 5);
+
+const formattedDelivery = deliveryDate.toLocaleDateString('en-IN', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric'
+});
+
+resultDiv.innerHTML = `
+  <p><strong>Order ID:</strong> ${data.orderId}</p>
+  <p><strong>Status:</strong> ${data.status}</p>
+  <p><strong>Delivery Address:</strong><br>${data.address}</p>
+  <p><strong>Order Date:</strong> ${new Date(data.createdAt).toLocaleString()}</p>
+  <p><strong>Delivery Date:</strong> ${formattedDelivery}</p>
+`;
+
+updateMap(data.status);
+
+    } catch (err) {
+      console.error(err);
+      resultDiv.innerHTML = "❌ Error tracking order.";
+    }
+  });
+</script>
+
+<!-- Keep your common script -->
+<script src="script.js"></script>
+
+</body>
+</html>

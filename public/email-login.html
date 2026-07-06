@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Email Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(120deg, #1e3c72, #2a5298);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .card {
+      background: white;
+      width: 100%;
+      max-width: 420px;
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+    }
+
+    h2 {
+      text-align: center;
+      color: #1e3c72;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #2a5298;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background: #2a5298;
+      color: white;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+
+    button:hover {
+      background: #1e3c72;
+    }
+
+    .msg {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #2a5298;
+      font-weight: bold;
+    }
+
+    .link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>Login</h2>
+
+  <input type="email" id="email" placeholder="Enter Email" required>
+  <input type="password" id="password" placeholder="Enter Password" required>
+
+  <button onclick="login()">Login</button>
+
+  <div class="link" onclick="forgotPassword()">Forgot Password?</div>
+
+  <p class="msg" id="msg"></p>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    sendPasswordResetEmail,
+    reload
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCL4NefGa709UUpDGvCxGVDNfsR3l5gFmM",
+    authDomain: "stationery-auth.firebaseapp.com",
+    projectId: "stationery-auth",
+    storageBucket: "stationery-auth.appspot.com",
+    messagingSenderId: "1071819486020",
+    appId: "1:1071819486020:web:820e9ab3a4a8b17799dd11"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // ================= LOGIN =================
+  window.login = async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    document.getElementById("msg").innerText = "";
+
+    try {
+      const userCred = await signInWithEmailAndPassword(auth, email, password);
+
+      await reload(userCred.user);
+
+      if (!userCred.user.emailVerified) {
+        document.getElementById("msg").innerText =
+          "Email not verified. Please verify your email first.";
+        return;
+      }
+
+      // send email to backend session create
+      const res = await fetch("/api/firebase-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        document.getElementById("msg").innerText =
+          "Login successful! Redirecting...";
+
+        setTimeout(() => {
+          window.location.href = "products.html";
+        }, 1500);
+
+      } else {
+        document.getElementById("msg").innerText =
+          "Server error: " + data.message;
+      }
+
+    } catch (err) {
+      console.log(err);
+
+      if (err.code === "auth/invalid-credential") {
+        document.getElementById("msg").innerText = "Invalid email or password.";
+      } else if (err.code === "auth/user-not-found") {
+        document.getElementById("msg").innerText = "User not found.";
+      } else {
+        document.getElementById("msg").innerText = err.message;
+      }
+    }
+  };
+
+  // ================= FORGOT PASSWORD =================
+  window.forgotPassword = async () => {
+    const email = document.getElementById("email").value.trim();
+
+    if (!email) {
+      document.getElementById("msg").innerText =
+        "Please enter your email first.";
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      document.getElementById("msg").innerText =
+        "Password reset link sent! Check your email.";
+
+    } catch (err) {
+      console.log(err);
+
+      if (err.code === "auth/user-not-found") {
+        document.getElementById("msg").innerText =
+          "No account found with this email.";
+      } else {
+        document.getElementById("msg").innerText = err.message;
+      }
+    }
+  };
+</script>
+
+</body>
+</html>
