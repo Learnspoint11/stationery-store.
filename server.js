@@ -864,8 +864,12 @@ app.get('/api/admin/orders', async (req, res) => {
 });
 /* ================= STATIC FILES ================= */
 
-app.use('/uploads',express.static(path.join(__dirname,'uploads')))
-app.use(express.static(path.join(__dirname,'public')))
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 /* ================= SERVER ================= */
 
