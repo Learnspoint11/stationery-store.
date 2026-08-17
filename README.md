@@ -43,15 +43,6 @@ The website provides a complete online shopping experience, including user authe
 
 Users can upload their own documents for printing.
 
-Pricing:
-
-| Printing Type       | Price        |
-| ------------------- | ------------ |
-| Black and White (B) | ₹2 per page  |
-| Color (C)           | ₹10 per page |
-| Delivery Charge     | ₹50          |
-
----
 
 ### Payment Features
 
