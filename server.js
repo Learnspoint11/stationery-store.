@@ -7,7 +7,7 @@ const multer = require('multer');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
 const Stripe = require("stripe");
-const stripe = new Stripe("sk_test_51SrMPfRMYu5zDe22kZRjiTC9UU1zQinPcTorOuUHM2MI3fvBTbNIA0SVexNTsPZS5ABCHwoZGTlMoSn9j2PPz1vx008ighT9U3");
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const User = require('./models/User');
 const Product = require('./models/Product');
 const Order = require('./models/Order');
@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(session({
-  secret: 'stationery_secret_key',
+   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -33,7 +33,7 @@ app.use(session({
 
 /* ================= DATABASE ================= */
 
-mongoose.connect('mongodb://127.0.0.1:27017/stationery')
+mongoose.connect(process.env.MONGO_URI)
 .then(()=>console.log("MongoDB Connected"))
 .catch(err=>console.log(err));
 
@@ -869,10 +869,8 @@ app.use(express.static(path.join(__dirname,'public')))
 
 /* ================= SERVER ================= */
 
-const PORT = 5000
+const PORT = process.env.PORT || 5000;
 
-app.listen(PORT,()=>{
-
- console.log("Server running on http://localhost:"+PORT)
-
-})
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
+});
